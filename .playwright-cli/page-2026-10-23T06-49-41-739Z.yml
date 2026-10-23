@@ -1,0 +1,89 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - text: RANGELOG
+      - generic [ref=e6]: LIVE OBSERVATION
+    - generic [ref=e7]:
+      - generic [ref=e8]: 로그인 필요
+      - button "Google 로그인" [ref=e9] [cursor=pointer]
+      - button "↓" [ref=e10] [cursor=pointer]
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - text: ACTIVE TOURNAMENT
+        - heading "오늘의 라이브 토너먼트" [level=1] [ref=e14]
+        - paragraph [ref=e15]: Table 1 · 6 seats · 0 completed hands
+      - generic [ref=e16]:
+        - button "새 토너먼트" [ref=e17] [cursor=pointer]
+        - button "+ 새 핸드" [ref=e18] [cursor=pointer]
+    - generic [ref=e19]:
+      - button "HUD 테이블" [ref=e20] [cursor=pointer]
+      - button "좌석 수정" [ref=e21] [cursor=pointer]
+      - button "BTN / 핸드 등록" [ref=e22] [cursor=pointer]
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [aria-hidden] [ref=e26]:
+          - generic [ref=e27]: NO LIMIT
+          - generic [ref=e28]: HOLD'EM
+        - generic [ref=e29]:
+          - text: RANGELOG
+          - generic [ref=e30]: 라이브 HUD
+      - button "1 P Player 1 VPIP – PFR – 3B –" [ref=e31] [cursor=pointer]:
+        - generic [ref=e32]: "1"
+        - generic [ref=e33]: P
+        - strong [ref=e34]: Player 1
+        - generic [ref=e35]:
+          - generic [ref=e36]: VPIP –
+          - generic [ref=e37]: PFR –
+          - generic [ref=e38]: 3B –
+      - button "2 P Player 2 VPIP – PFR – 3B –" [ref=e39] [cursor=pointer]:
+        - generic [ref=e40]: "2"
+        - generic [ref=e41]: P
+        - strong [ref=e42]: Player 2
+        - generic [ref=e43]:
+          - generic [ref=e44]: VPIP –
+          - generic [ref=e45]: PFR –
+          - generic [ref=e46]: 3B –
+      - button "3 P Player 3 VPIP – PFR – 3B –" [ref=e47] [cursor=pointer]:
+        - generic [ref=e48]: "3"
+        - generic [ref=e49]: P
+        - strong [ref=e50]: Player 3
+        - generic [ref=e51]:
+          - generic [ref=e52]: VPIP –
+          - generic [ref=e53]: PFR –
+          - generic [ref=e54]: 3B –
+      - button "4 P Player 4 VPIP – PFR – 3B –" [ref=e55] [cursor=pointer]:
+        - generic [ref=e56]: "4"
+        - generic [ref=e57]: P
+        - strong [ref=e58]: Player 4
+        - generic [ref=e59]:
+          - generic [ref=e60]: VPIP –
+          - generic [ref=e61]: PFR –
+          - generic [ref=e62]: 3B –
+      - button "5 P Player 5 VPIP – PFR – 3B –" [ref=e63] [cursor=pointer]:
+        - generic [ref=e64]: "5"
+        - generic [ref=e65]: P
+        - strong [ref=e66]: Player 5
+        - generic [ref=e67]:
+          - generic [ref=e68]: VPIP –
+          - generic [ref=e69]: PFR –
+          - generic [ref=e70]: 3B –
+      - button "6 P Player 6 VPIP – PFR – 3B –" [ref=e71] [cursor=pointer]:
+        - generic [ref=e72]: "6"
+        - generic [ref=e73]: P
+        - strong [ref=e74]: Player 6
+        - generic [ref=e75]:
+          - generic [ref=e76]: VPIP –
+          - generic [ref=e77]: PFR –
+          - generic [ref=e78]: 3B –
+    - generic [ref=e79]:
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - text: HAND LOG
+          - heading "핸드 기록" [level=2] [ref=e82]
+          - paragraph [ref=e83]: Draft와 Completed를 함께 보관하고 완료본만 HUD에 반영합니다.
+        - generic [ref=e84]: 0 Draft · 0 Completed
+      - generic [ref=e85]: 아직 기록된 핸드가 없습니다. + 새 핸드를 눌러 실제 BTN을 선택하세요.
+  - contentinfo [ref=e87]:
+    - generic [ref=e88]: RangeLog MVP · 원본 액션에서 HUD 재집계
+    - generic [ref=e89]: server-saved
