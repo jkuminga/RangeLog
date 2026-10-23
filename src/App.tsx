@@ -55,6 +55,10 @@ export default function App() {
   const [restores, setRestores] = useState<LocalDraftRecord[]>([])
   const [toast, setToast] = useState<string>()
   const [newPlayerName, setNewPlayerName] = useState('')
+  const [isTournamentModalOpen, setTournamentModalOpen] = useState(false)
+  const [tournamentName, setTournamentName] = useState('')
+  const [tournamentSeatCount, setTournamentSeatCount] = useState('6')
+  const [tournamentFormError, setTournamentFormError] = useState<string>()
   const [authReady, setAuthReady] = useState(false)
   const [authEmail, setAuthEmail] = useState<string>()
 
@@ -161,15 +165,26 @@ export default function App() {
     setActiveHandId(editDraft.id)
   }
 
+  /** openTournamentModal: 새 토너먼트의 이름과 기본 좌석 수를 한 모달에서 입력하도록 초기화한다. */
+  const openTournamentModal = () => {
+    setTournamentName(`토너먼트 ${workspace.tournaments.length + 1}`)
+    setTournamentSeatCount('6')
+    setTournamentFormError(undefined)
+    setTournamentModalOpen(true)
+  }
+
+  /** createTournament: 입력한 이름과 기본 좌석 수로 활성 토너먼트와 첫 테이블 세션을 생성한다. */
   const createTournament = () => {
-    const name = window.prompt('토너먼트 이름', `토너먼트 ${workspace.tournaments.length + 1}`)?.trim()
-    if (!name) return
-    const seatCount = Number(window.prompt('기본 좌석 수', '6'))
-    if (!Number.isInteger(seatCount) || seatCount < 2 || seatCount > 10) { setToast('좌석 수는 2~10 사이 정수로 입력하세요.'); return }
+    const name = tournamentName.trim()
+    const seatCount = Number(tournamentSeatCount)
+    if (!name) { setTournamentFormError('토너먼트 이름을 입력하세요.'); return }
+    if (!Number.isInteger(seatCount) || seatCount < 2 || seatCount > 10) { setTournamentFormError('좌석 수는 2~10 사이의 정수여야 합니다.'); return }
     const tournament: Tournament = { id: createId('tournament'), name, defaultSeatCount: seatCount, status: 'active', createdAt: nowIso() }
     const session: TableSession = { id: createId('table'), tournamentId: tournament.id, name: 'Table 1', seatCount, createdAt: nowIso() }
     const seats: SeatAssignment[] = Array.from({ length: seatCount }, (_, index) => ({ id: createId('seat'), tableSessionId: session.id, seatNo: index + 1, startedAt: nowIso() }))
     updateWorkspace((current) => ({ ...current, tournaments: [...current.tournaments.map((item) => item.status === 'active' ? { ...item, status: 'completed' as const, completedAt: nowIso() } : item), tournament], sessions: [...current.sessions, session], seats: [...current.seats, ...seats] }))
+    setTournamentModalOpen(false)
+    setToast(`${name} 토너먼트를 만들었습니다.`)
   }
 
   const exportAll = async () => {
@@ -183,7 +198,7 @@ export default function App() {
   return <div className="app-shell">
     <header className="app-header"><div className="brand-mark">RANGE<span>LOG</span><small>LIVE OBSERVATION</small></div><div className="header-actions"><span className="account-badge">{hasSupabase() ? (authEmail ?? '로그인 필요') : '로컬 데모'}</span>{hasSupabase() && <button className="text-button" onClick={() => void supabase?.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })}>Google 로그인</button>}<button className="icon-button" title="JSON 백업" onClick={() => void exportAll()}>↓</button></div></header>
     <main className="main-content">
-      <section className="context-bar"><div><span className="eyebrow">ACTIVE TOURNAMENT</span><h1>{activeTournament?.name ?? '토너먼트 없음'}</h1><p>{activeSession?.name ?? '테이블 없음'} · {activeSession?.seatCount ?? 0} seats · {completedHands.length} completed hands</p></div><div className="context-actions"><button className="secondary-button" onClick={createTournament}>새 토너먼트</button><button className="primary-button" onClick={() => { setButtonPicking(true); setMode('table') }}>+ 새 핸드</button></div></section>
+      <section className="context-bar"><div><span className="eyebrow">ACTIVE TOURNAMENT</span><h1>{activeTournament?.name ?? '토너먼트 없음'}</h1><p>{activeSession?.name ?? '테이블 없음'} · {activeSession?.seatCount ?? 0} seats · {completedHands.length} completed hands</p></div><div className="context-actions"><button className="secondary-button" onClick={openTournamentModal}>새 토너먼트</button><button className="primary-button" onClick={() => { setButtonPicking(true); setMode('table') }}>+ 새 핸드</button></div></section>
       {restores.length > 0 && <section className="restore-banner"><div><strong>복원 가능한 Draft {restores.length}개</strong><small>IndexedDB에 저장된 미완성 입력입니다. 선택해서 이어서 기록하세요.</small></div><div className="restore-list">{restores.slice(0, 3).map((record) => <button key={record.id} onClick={() => void resumeDraft(record)}>{record.hand.draftKind === 'edit' ? '편집본' : 'Draft'} · {new Date(record.savedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} · {actionLabel(record.syncState)}</button>)}</div></section>}
       <div className="mode-tabs"><button className={mode === 'table' && !buttonPicking ? 'active' : ''} onClick={() => { setMode('table'); setButtonPicking(false) }}>HUD 테이블</button><button className={mode === 'seats' ? 'active' : ''} onClick={() => { setMode('seats'); setButtonPicking(false) }}>좌석 수정</button><button className={buttonPicking ? 'active' : ''} onClick={() => { setButtonPicking(true); setMode('table') }}>BTN / 핸드 등록</button></div>
       {buttonPicking && <div className="instruction-banner"><span className="pulse-dot" /> 새 핸드의 실제 BTN 좌석을 탭하세요. 위치를 자동 이동하지 않습니다.</div>}
@@ -192,6 +207,7 @@ export default function App() {
       <section className="records-section"><div className="section-heading"><div><span className="eyebrow">HAND LOG</span><h2>핸드 기록</h2><p>Draft와 Completed를 함께 보관하고 완료본만 HUD에 반영합니다.</p></div><span className="record-count">{draftHands.length} Draft · {completedHands.length} Completed</span></div><div className="record-list">{[...workspace.hands].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 12).map((hand) => <button key={hand.id} className="record-row" onClick={() => hand.status === 'draft' ? setActiveHandId(hand.id) : setSelectedCompletedHand(hand)}><span className={`status-dot ${hand.status}`} /><span><strong>{hand.draftKind === 'edit' ? 'Completed 편집본' : hand.status === 'draft' ? '새 핸드 Draft' : 'Completed 핸드'}</strong><small>{new Date(hand.updatedAt).toLocaleString('ko-KR')} · {hand.actions.length} actions · BTN {hand.buttonSeat}</small></span><span className="record-arrow">›</span></button>)}{workspace.hands.length === 0 && <div className="empty-state">아직 기록된 핸드가 없습니다. <b>+ 새 핸드</b>를 눌러 실제 BTN을 선택하세요.</div>}</div></section>
     </main>
     <footer className="app-footer"><span>RangeLog MVP · 원본 액션에서 HUD 재집계</span><span className={`save-status ${draftSyncState}`}>{activeHand ? draftSyncState : 'server-saved'}</span></footer>
+    {isTournamentModalOpen && <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setTournamentModalOpen(false) }}><section className="edit-modal tournament-modal" role="dialog" aria-modal="true" aria-labelledby="tournament-modal-title" onKeyDown={(event) => event.key === 'Escape' && setTournamentModalOpen(false)}><div className="modal-head"><div><span className="eyebrow">NEW TOURNAMENT</span><strong id="tournament-modal-title">새 토너먼트 만들기</strong><small>이름과 기본 좌석 수를 설정하세요.</small></div><button className="icon-button" type="button" aria-label="새 토너먼트 모달 닫기" onClick={() => setTournamentModalOpen(false)}>×</button></div><form className="tournament-form" onSubmit={(event) => { event.preventDefault(); createTournament() }}><label className="field-label">토너먼트 이름<input autoFocus value={tournamentName} placeholder="예: 금요일 라이브" onChange={(event) => { setTournamentName(event.target.value); setTournamentFormError(undefined) }} /></label><label className="field-label">기본 좌석 수<input type="number" min="2" max="10" step="1" inputMode="numeric" value={tournamentSeatCount} onChange={(event) => { setTournamentSeatCount(event.target.value); setTournamentFormError(undefined) }} /></label>{tournamentFormError && <p className="inline-error">{tournamentFormError}</p>}<div className="modal-actions"><button className="secondary-button" type="button" onClick={() => setTournamentModalOpen(false)}>취소</button><button className="primary-button" type="submit">토너먼트 만들기</button></div></form></section></div>}
     {selectedPlayer && activeTournament && <PlayerDetail player={selectedPlayer} hands={workspace.hands} tournamentId={activeTournament.id} onClose={() => setSelectedPlayer(undefined)} />}
     {selectedCompletedHand && <ReadonlyHand hand={selectedCompletedHand} players={workspace.players} onClose={() => setSelectedCompletedHand(undefined)} onEdit={() => editCompleted(selectedCompletedHand)} />}
     {toast && <button className="toast" onClick={() => setToast(undefined)}>{toast}</button>}
